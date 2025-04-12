@@ -95,6 +95,31 @@ ${data.comparisonResult}
 참조 이미지 URL: ${data.referenceImageUrl}`;
 
 /**
+ * 이미지 다운로드 함수
+ * @param url - 다운로드할 이미지의 URL
+ * @returns 다운로드된 이미지의 URL
+ */
+const downloadImage = async (
+    url: string,
+): Promise<{ imageData: Buffer; mimeType: string }> => {
+    try {
+        elizaLogger.info(`Downloading image from: ${url}`);
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to download image: ${response.statusText}`);
+        }
+        // 이미지 데이터를 받아서 처리하거나 임시 파일로 저장할 수 있음
+        // 여기서는 URL을 그대로 반환하는 간단한 구현
+        const imageData = await response.arrayBuffer();
+        const mimeType = response.headers.get("content-type") || "image/png";
+        return { imageData: Buffer.from(imageData), mimeType };
+    } catch (error) {
+        elizaLogger.error(`Error downloading image: ${error}`);
+        throw error;
+    }
+};
+
+/**
  * 이미지 감사 액션 설정
  */
 export const auditAction = {
@@ -113,16 +138,19 @@ export const auditAction = {
         // 상태 초기화 또는 업데이트
         let currentState = state;
         if (!currentState) {
+            elizaLogger.info("Composing state...");
             currentState = (await runtime.composeState(message)) as State;
         } else {
+            elizaLogger.info("Updating recent message state...");
             currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         elizaLogger.info("Starting image audit process...");
+        elizaLogger.info(`got this message ${message}`);
+        elizaLogger.info(`got currentState ${currentState}`);
 
         // 2. getIPDetails 액션을 호출
         const ipDetailsAction = new GetIPDetailsAction();
-
         const ipDetails = await ipDetailsAction.getIPDetails({
             ipId: "0x994BFe1468735060146Ff3510971955a9e0079C2",
         });
@@ -139,48 +167,47 @@ export const auditAction = {
 
         elizaLogger.info(`Reference image URL: ${referenceImageUrl}`);
 
-        // 4 & 5. 이미지 비교 로직 (실제 구현에서는 이미지 다운로드 및 비교 알고리즘 필요)
-        // 여기서는 간단한 예시로 구현
+        // 4. imageURL에서 이미지 다운로드
+        const { imageData, mimeType } = await downloadImage(referenceImageUrl);
 
-        return true;
+        elizaLogger.info("Adding Story Image to compare ...");
 
-        // 사용자 메시지에서 이미지 URL 추출
+        const memory = await runtime.messageManager.addEmbeddingToMemory({
+            userId: message.agentId,
+            agentId: message.agentId,
+            roomId: message.roomId,
+            content: {
+                text: "스토리 프로토콜에 0x994BFe1468735060146Ff3510971955a9e0079C2 주소로 등록된 이미지이다.",
+                file: imageData,
+            },
+        });
+
+        const additionalState = (await runtime.composeState(memory)) as State;
+        currentState = await runtime.updateRecentMessageState(additionalState);
+
         // Generate content using template
+        elizaLogger.info("Starting Image Audit...");
         const content = await generateObjectDeprecated({
             runtime,
             context: composeContext({
                 state: currentState,
                 template: auditTemplate,
             }),
-            modelClass: ModelClass.IMAGE,
+            modelClass: ModelClass.LARGE,
         });
 
-        // const userImageUrl = await generateObjectDeprecated(runtime, context);
-
-        // if (!userImageUrl || !userImageUrl.userImageUrl) {
-        //     elizaLogger.error("Failed to extract user image URL from message");
-        //     return false;
-        // }
-
-        // try {
-        //     // 감사 실행
-        //     const auditAction = new AuditAction();
-        //     const result = await auditAction.auditImage({
-        //         userImageUrl: userImageUrl.userImageUrl,
-        //     });
-
-        //     // 결과 포맷팅 및 응답
-        //     const formattedResult = formatAuditResult(result);
-        //     await runtime.sendMessage(formattedResult);
-
-        //     return true;
-        // } catch (error) {
-        //     elizaLogger.error("Error in AUDIT_IMAGE action:", error);
-        //     await runtime.sendMessage(
-        //         "이미지 감사 중 오류가 발생했습니다. 다시 시도해 주세요.",
-        //     );
-        //     return false;
-        // }
+        // // Fetch and format IP details
+        // "isStyleSimilar": boolean,
+        // "comparisonResult": string,
+        // "referenceIPAddress": string
+        callback({
+            text: `Successfully audit image`,
+            content: {
+                isStyleSimilar: content.isStyleSimilar,
+                comparisonResult: content.comparisonResult,
+                referenceIPAddress: content.referenceIPAddress,
+            },
+        });
 
         return true;
     },

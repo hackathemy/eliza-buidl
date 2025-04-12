@@ -104,14 +104,26 @@ export const auditTemplate = `Given the recent messages below:
 
 {{recentMessages}}
 
-Extract the following information about the requested IP details:
-- Field "ipId": The IP Asset that you want to get details for
+Analysis Purpose: Compare the artistic style of the two recently sent images.
 
-Respond with a JSON markdown block containing only the extracted values. A user must provide an ipId.
+Extract and analyze the following information:
+- Visual characteristics of both images (color, composition, line usage, texture, etc.)
+- Whether the artistic styles are similar
+- If determined to be similar, provide the registered IP address information. 
+- the IP address is already provided in the recent messages. it should be start with 0x
+
+Respond with analysis results in the following JSON format:
 
 \`\`\`json
 {
-    "ipId": string
+    "isStyleSimilar": boolean,
+    "comparisonResult": string,
+    "referenceIPAddress": string
 }
 \`\`\`
+
+Where:
+- isStyleSimilar: Whether the artistic styles of the two images are similar (true/false)
+- comparisonResult: Detailed explanation of the similarity analysis
+- referenceIPAddress: The registered IP address if styles are similar
 `;
