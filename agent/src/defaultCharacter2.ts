@@ -1,10 +1,10 @@
 import { type Character, ModelProviderName } from "@elizaos/core";
 import {Upstage} from "@elizaos-plugins/plugin-upstage"
-
+import Story from "@elizaos-plugins/plugin-story"
 
 export const defaultCharacter2: Character = {
     name: "Sseus",
-    plugins: [ Upstage],
+    plugins: [ Upstage, Story],
     modelProvider: ModelProviderName.ANTHROPIC,
     settings: {
         secrets: {},

@@ -21,6 +21,8 @@ import {
 } from "@elizaos/core";
 import { defaultCharacter } from "./defaultCharacter.ts";
 import {Upstage} from "@elizaos-plugins/plugin-upstage"
+import Story from "@elizaos/plugin-story"
+
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import JSON5 from "json5";
 
