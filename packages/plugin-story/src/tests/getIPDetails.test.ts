@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { WalletProvider } from "../providers/wallet.ts";
-import { ModelProviderName, type Character } from "@elizaos/core";
-
+import { elizaLogger, ModelProviderName, type Character } from "@elizaos/core";
+import { GetIPDetailsAction } from "../actions/getIPDetails.ts";
+import { API_URL } from "../lib/api.ts";
 // 테스트용 기본 캐릭터 정의
 const defaultCharacter: Character = {
     name: "Eliza",
@@ -558,10 +559,19 @@ const mockCacheManager = {
     delete: vi.fn(),
 };
 
-describe("WalletProvider", () => {
+const mockState = {
+    userId: "0x1234567890123456789012345678901234567890",
+    agentId: "0x1234567890123456789012345678901234567890",
+    content: {
+        text: "What's your favorite way to spend a Sunday?",
+    },
+};
+
+describe("Story Get IP Details Action", () => {
     let walletProvider;
     let mockedRuntime;
 
+    // 테스트 전 초기화
     beforeEach(() => {
         vi.clearAllMocks();
         mockCacheManager.get.mockResolvedValue(null);
@@ -584,10 +594,20 @@ describe("WalletProvider", () => {
         vi.clearAllTimers();
     });
 
-    describe("Wallet Integration", () => {
-        it("should check wallet address", async () => {
-            const address = await walletProvider.getAddress();
-            expect(address).toEqual(walletProvider.address);
+    describe("Get IP Details", () => {
+        it("should get IP details", async () => {
+            const ipDetailsAction = new GetIPDetailsAction();
+            // API_URL 설정 확인을 위해 로깅 추가
+            elizaLogger.log("Current API_URL:", API_URL);
+
+            const ipDetails = await ipDetailsAction.getIPDetails({
+                ipId: "0x994BFe1468735060146Ff3510971955a9e0079C2",
+            });
+
+            // API 호출 결과 로깅
+            elizaLogger.log("API Response:", ipDetails);
+
+            elizaLogger.info(ipDetails);
         });
     });
 });

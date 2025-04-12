@@ -13,25 +13,27 @@ import { elizaLogger } from "@elizaos/core";
 import { camelize } from "./utils";
 const API_BASE_URL = process.env.STORY_API_BASE_URL;
 const API_VERSION = "v2";
-export const API_URL = `${API_BASE_URL}/${API_VERSION}`;
-export const API_KEY = process.env.STORY_API_KEY || "";
+// export const API_URL = `${API_BASE_URL}/${API_VERSION}`;
+export const API_URL = "https://api.storyapis.com/api/v3";
+export const API_KEY =
+    process.env.STORY_API_KEY || "MhBsxkU1z9fG6TofE59KqiiWV-YlYE8Q4awlLQehF3U";
 
 export async function getResource(
     resourceName: ResourceType,
     resourceId: string,
     // eslint-disable-next-line
-    _options?: QueryOptions
+    _options?: QueryOptions,
 ) {
     try {
-        elizaLogger.log(
-            `Fetching resource ${API_URL}/${resourceName}/${resourceId}`
+        elizaLogger.info(
+            `Fetching resource ${API_URL}/${resourceName}/${resourceId}`,
         );
         const res = await fetch(`${API_URL}/${resourceName}/${resourceId}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "x-api-key": API_KEY as string,
-                "x-chain": "1516",
+                "x-chain": "story-aeneid",
             },
         });
         if (res.ok) {
@@ -46,10 +48,9 @@ export async function getResource(
     }
 }
 
-
 export async function listResource(
     resourceName: ResourceType,
-    options?: QueryOptions
+    options?: QueryOptions,
 ) {
     try {
         const _options = {
@@ -92,7 +93,7 @@ export async function listResource(
 
 export async function fetchLicenseTermsDetails(data: IPLicenseTerms[]) {
     const requests = data.map((item) =>
-        getResource(RESOURCE_TYPE.LICENSE_TERMS, item.licenseTermsId)
+        getResource(RESOURCE_TYPE.LICENSE_TERMS, item.licenseTermsId),
     );
     const results = await Promise.all(requests);
 
@@ -102,7 +103,7 @@ export async function fetchLicenseTermsDetails(data: IPLicenseTerms[]) {
             return {
                 ...result.data,
                 licenseTerms: convertLicenseTermObject(
-                    result.data.licenseTerms
+                    result.data.licenseTerms,
                 ),
             };
         });
@@ -118,7 +119,7 @@ export function convertLicenseTermObject(licenseTerms: Trait[]): LicenseTerms {
                 ? true
                 : option.value === "false"
                   ? false
-                  : option.value as string | number;  // Replaced any with string | number
+                  : (option.value as string | number); // Replaced any with string | number
         return acc as LicenseTerms;
     }, {});
 }

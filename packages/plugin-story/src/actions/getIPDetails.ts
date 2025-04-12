@@ -27,14 +27,14 @@ type GetIPDetailsResponse = {
 /**
  * Class handling IP details retrieval from Story Protocol
  */
-class GetIPDetailsAction {
+export class GetIPDetailsAction {
     async getIPDetails(
-        params: GetIPDetailsParams
+        params: GetIPDetailsParams,
     ): Promise<GetIPDetailsResponse> {
-        elizaLogger.log("Fetching from", `${API_URL}/${RESOURCE_TYPE.ASSET}`);
+        elizaLogger.info("Fetching from", `${API_URL}/${RESOURCE_TYPE.ASSET}`);
         return (await getResource(
             RESOURCE_TYPE.ASSET,
-            params.ipId
+            params.ipId,
         )) as GetIPDetailsResponse;
     }
 }
@@ -71,13 +71,13 @@ export const getIPDetailsAction = {
         message: Memory,
         state: State,
         _options: Record<string, unknown>,
-        callback?: HandlerCallback
+        callback?: HandlerCallback,
     ): Promise<boolean> => {
         elizaLogger.log("Starting GET_IP_DETAILS handler...");
 
         // Initialize or update state
-            let currentState = state;
-            if (!currentState) {
+        let currentState = state;
+        if (!currentState) {
             currentState = (await runtime.composeState(message)) as State;
         } else {
             currentState = await runtime.updateRecentMessageState(currentState);
@@ -86,7 +86,10 @@ export const getIPDetailsAction = {
         // Generate content using template
         const content = await generateObjectDeprecated({
             runtime,
-            context: composeContext({ state: currentState, template: getIPDetailsTemplate }),
+            context: composeContext({
+                state: currentState,
+                template: getIPDetailsTemplate,
+            }),
             modelClass: ModelClass.SMALL,
         });
 

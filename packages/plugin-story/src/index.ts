@@ -13,7 +13,7 @@ import { licenseIPAction } from "./actions/licenseIP";
 import { getAvailableLicensesAction } from "./actions/getAvailableLicenses";
 import { getIPDetailsAction } from "./actions/getIPDetails";
 import { attachTermsAction } from "./actions/attachTerms";
-
+import { auditAction } from "./actions/audit";
 export const storyPlugin: Plugin = {
     name: "story",
     description: "Story integration plugin",
@@ -26,6 +26,7 @@ export const storyPlugin: Plugin = {
         attachTermsAction,
         getAvailableLicensesAction,
         getIPDetailsAction,
+        auditAction,
     ],
 };
 

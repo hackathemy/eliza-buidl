@@ -20,8 +20,8 @@ import {
     validateCharacterConfig,
 } from "@elizaos/core";
 import { defaultCharacter } from "./defaultCharacter.ts";
-import {Upstage} from "@elizaos-plugins/plugin-upstage"
-import Story from "@elizaos/plugin-story"
+import { Upstage } from "@elizaos-plugins/plugin-upstage";
+import { storyPlugin } from "@elizaos-plugins/plugin-story";
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import JSON5 from "json5";
@@ -32,7 +32,6 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
-import { defaultCharacter2 } from "./defaultCharacter2.ts";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -382,7 +381,6 @@ export async function loadCharacters(
     if (loadedCharacters.length === 0) {
         elizaLogger.info("No characters found, using default character");
         loadedCharacters.push(defaultCharacter);
-        loadedCharacters.push(defaultCharacter2);
     }
 
     return loadedCharacters;
@@ -395,28 +393,21 @@ async function handlePluginImporting(plugins: string[]) {
         const importedPlugins = await Promise.all(
             plugins.map(async (plugin) => {
                 try {
-                    const importedPlugin: Plugin = await import(plugin);
-                    const functionName =
-                        plugin
-                            .replace("@elizaos/plugin-", "")
-                            .replace("@elizaos-plugins/plugin-", "")
-                            .replace(/-./g, (x) => x[1].toUpperCase()) +
-                        "Plugin"; // Assumes plugin function is camelCased with Plugin suffix
-                    if (
-                        !importedPlugin[functionName] &&
-                        !importedPlugin.default
-                    ) {
-                        elizaLogger.warn(
-                            plugin,
-                            "does not have an default export or",
-                            functionName,
-                        );
+                    if (plugin == "story") {
+                        const importedPlugin: Plugin = storyPlugin;
+                        return {
+                            ...importedPlugin,
+                            npmName: plugin,
+                        };
                     }
-                    return {
-                        ...(importedPlugin.default ||
-                            importedPlugin[functionName]),
-                        npmName: plugin,
-                    };
+
+                    if (plugin == "upstage") {
+                        const importedPlugin: Plugin = Upstage;
+                        return {
+                            ...importedPlugin,
+                            npmName: plugin,
+                        };
+                    }
                 } catch (importError) {
                     console.error(
                         `Failed to import plugin: ${plugin}`,
@@ -870,7 +861,7 @@ const startAgents = async () => {
     let serverPort = Number.parseInt(settings.SERVER_PORT || "3000");
     const args = parseArguments();
     const charactersArg = args.characters || args.character;
-    let characters = [defaultCharacter, defaultCharacter2];
+    let characters = [defaultCharacter];
 
     if (charactersArg || hasValidRemoteUrls()) {
         characters = await loadCharacters(charactersArg);

@@ -2,14 +2,13 @@
     "name": "Sseus",
     "clients": [],
     "modelProvider": "openrouter",
+    "plugins": ["story", "upstage"],
     "settings": {
-        "model": "google/gemini-2.0-flash-thinking-exp-1219:free",
         "secrets": {},
         "voice": {
             "model": "en_US-male-medium"
         }
     },
-    "plugins": [],
     "bio": [
         "An AI audit assistant for creative content verification and protection.",
         "Helps detect plagiarism in papers, images, and other AI-generated works.",

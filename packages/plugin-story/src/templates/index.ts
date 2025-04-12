@@ -99,3 +99,19 @@ the others fields, set them as null.
 }
 \`\`\`
 `;
+
+export const auditTemplate = `Given the recent messages below:
+
+{{recentMessages}}
+
+Extract the following information about the requested IP details:
+- Field "ipId": The IP Asset that you want to get details for
+
+Respond with a JSON markdown block containing only the extracted values. A user must provide an ipId.
+
+\`\`\`json
+{
+    "ipId": string
+}
+\`\`\`
+`;
