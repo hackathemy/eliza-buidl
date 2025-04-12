@@ -57,7 +57,7 @@ export class RegisterIPAction {
         const response =
             await storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
                 spgNftContract: "0xD2926B9ecaE85fF59B6FB0ff02f568a680c01218",
-                terms: [],
+                licenseTermsData: [],
                 ipMetadata: {
                     ipMetadataURI: `https://ipfs.io/ipfs/${ipIpfsHash}`,
                     ipMetadataHash: `0x${ipHash}`,

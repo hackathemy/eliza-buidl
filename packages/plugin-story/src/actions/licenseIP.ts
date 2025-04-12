@@ -37,6 +37,8 @@ export class LicenseIPAction {
         const response = await storyClient.license.mintLicenseTokens({
             licensorIpId: params.licensorIpId,
             licenseTermsId: params.licenseTermsId,
+            maxMintingFee: BigInt(1),
+            maxRevenueShare: 0,
             amount: params.amount || 1,
             txOptions: { waitForTransaction: true },
         });
