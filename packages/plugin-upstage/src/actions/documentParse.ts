@@ -12,7 +12,7 @@ import {
 } from "@elizaos/core"; // Eliza OS의 핵심 타입과 인터페이스 가져오기
 import { composeContext } from "@elizaos/core"; // 컨텍스트 생성 유틸리티 가져오기
 import FormData from "form-data";
-
+import axios from 'axios';
 // 입금 내용의 인터페이스 정의, Content를 확장
 export interface DocumentParseContent extends Content {
     action: "string"
@@ -90,28 +90,24 @@ export default {
             console.log("path", FILE_PATH)
             const formData = new FormData();
             formData.append("document", fs.createReadStream(FILE_PATH));
-            console.log("formData:", formData)
             formData.append("output_formats", JSON.stringify(["html", "text"]));
-            console.log("formData:", formData)
             formData.append("base64_encoding", JSON.stringify(["table"]));
-            console.log("formData:", formData)
             formData.append("ocr", "auto");
-            console.log("formData:", formData)
             formData.append("coordinates", "true");
-            console.log("formData:", formData)
             formData.append("model", "document-parse");
             console.log("formData:", formData)
             try {
-                const response = await fetch(
-                    "https://api.upstage.ai/v1/document-digitization",
-                {
-        method: "POST",
-        headers: { Authorization: `Bearer ${API_KEY}` },
-        body: formData,
-      }
-    );
-    console.log(await response.json());
-    callback({text: `${response.json}`})
+                const response = await axios({
+                    url: "https://api.upstage.ai/v1/document-ai/document-parse", // 올바른 엔드포인트
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${API_KEY}`,
+                      // FormData가 자동으로 Content-Type을 설정하므로 추가 헤더 불필요
+                    },
+                    data: formData, // axios에서는 body 대신 data 사용
+                  });
+    console.log(await response);
+    callback({text: `${response}`})
   } catch (error) {
     console.error("Error:", error);
     callback({text: "it has error occurred"})
