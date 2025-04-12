@@ -1,0 +1,1 @@
+pnpm build && cd packages/plugin-story && pnpm build && cd ../../ && pnpm start
